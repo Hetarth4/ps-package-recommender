@@ -1,0 +1,25 @@
+<svg width="165" height="32" viewBox="0 0 165 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- ThoughtSpot Logo -->
+  <g id="thoughtspot-logo">
+    <!-- T Icon -->
+    <path d="M4 0H20V4H13V16H9V4H4V0Z" fill="white"/>
+    <path d="M16 8H20V16H16V8Z" fill="white"/>
+    <circle cx="18" cy="18" r="2" fill="white"/>
+    
+    <!-- ThoughtSpot Text -->
+    <path d="M28 4H31V6H34V4H37V12H34V10H31V12H28V4Z" fill="white"/>
+    <path d="M40 4H43V12H40V4Z" fill="white"/>
+    <path d="M46 4H49V6H52V4H55V12H52V10H49V12H46V4Z" fill="white"/>
+    <path d="M58 4H64V6H61V8H63V10H61V12H58V4Z" fill="white"/>
+    <path d="M67 4H73V6H70V8H72V10H70V12H67V4Z" fill="white"/>
+    <path d="M76 4H79V8H82V4H85V12H82V10H79V12H76V4Z" fill="white"/>
+    <path d="M88 4H94V6H91V12H88V4Z" fill="white"/>
+    <path d="M97 4H103V6H100V8H102V10H100V12H97V4Z" fill="white"/>
+    <path d="M106 4H109V6H112V8H109V10H112V12H106V10H109V8H106V4Z" fill="white"/>
+    <path d="M115 4H121V6H118V8H120V10H118V12H115V4Z" fill="white"/>
+    <path d="M124 4H130V12H127V6H124V4Z" fill="white"/>
+  </g>
+</svg>
+
+
+

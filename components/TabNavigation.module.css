@@ -1,0 +1,62 @@
+.tabContainer {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 2px solid var(--ts-border);
+  margin: 2rem 0 2rem;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  color: var(--ts-text-tertiary);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  position: relative;
+  letter-spacing: 0.02em;
+}
+
+.tab::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--ts-primary);
+  transform: scaleX(0);
+  transition: transform 0.25s ease;
+  box-shadow: 0 0 8px rgba(0, 212, 221, 0.6);
+}
+
+.tab:hover {
+  color: var(--ts-text-primary);
+  background-color: rgba(0, 212, 221, 0.05);
+  border-radius: 6px 6px 0 0;
+}
+
+.tab.active {
+  color: var(--ts-text-primary);
+  font-weight: 600;
+}
+
+.tab.active::before {
+  transform: scaleX(1);
+}
+
+@media (max-width: 768px) {
+  .tabContainer {
+    margin: 1rem 0;
+  }
+
+  .tab {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+

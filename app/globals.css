@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+:root {
+  /* ThoughtSpot Official Website Colors */
+  --ts-background: #0B1120;
+  --ts-surface: #141B2E;
+  --ts-surface-hover: #1A2235;
+  --ts-surface-elevated: #1F2940;
+  --ts-border: #2A3548;
+  --ts-border-light: #374152;
+  --ts-primary: #00D4DD;
+  --ts-primary-hover: #00BCC4;
+  --ts-primary-light: #1FDEE6;
+  --ts-secondary: #00D4DD;
+  --ts-accent-cyan: #00D4DD;
+  --ts-accent-blue: #2D8EFF;
+  --ts-text-primary: #FFFFFF;
+  --ts-text-secondary: #A8B2D1;
+  --ts-text-tertiary: #6B7A99;
+  --ts-text-muted: #4A5568;
+  --ts-success: #00C896;
+  --ts-warning: #FFB84D;
+  --ts-error: #FF6B6B;
+  --ts-gradient-start: #00D4DD;
+  --ts-gradient-end: #2D8EFF;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--ts-background);
+  color: var(--ts-text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+  line-height: 1.65;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+a {
+  color: var(--ts-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--ts-primary-hover);
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ts-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ts-border);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ts-text-tertiary);
+}
+
