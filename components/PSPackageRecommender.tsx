@@ -22,9 +22,13 @@ const PSC_CONTACT = {
   contacts: [
     { name: 'MJ Densmore', region: 'NA' },
     { name: 'Carolyn Chupa', region: 'NA' },
+    { name: 'Ramya Krishnaswamy', region: 'NA' },
+    { name: 'Sal Giannino', region: 'NA' },
+    { name: 'Carolina Antonio', region: 'NA' },
     { name: 'Camilla Tanzi', region: 'EMEA' },
     { name: 'Hetarth Chokshi', region: 'EMEA' },
     { name: 'Arjun Krishnan', region: 'Scale' },
+    { name: 'Joel Yesuratnam', region: 'Scale' },
   ],
 }
 
@@ -57,25 +61,25 @@ const PACKAGE_FEATURES = {
   Advanced: {
     name: 'Jumpstart AI Advanced',
     features: [
-      'Full platform setup including data modeling, security configuration, and performance optimization',
+      'Strategic recommendations and best practices for your ThoughtSpot implementation',
+      'Guidance on data modeling, security configuration, and platform optimization',
       'In-depth training sessions covering Search, Liveboard creation, formulas, and admin capabilities',
-      'We\'ll develop multiple Liveboards and Answers tailored to your specific business questions',
-      'Your business logic and custom calculations will be built right into your data model',
-      'We\'ll create a rollout plan to help drive adoption across your organization',
-      'Post-launch check-ins to make sure everything is working smoothly and answer questions',
+      'Architectural advice and strategies tailored to your specific business needs',
+      'Rollout planning recommendations to help drive adoption across your organization',
+      'Advisory support with minimal hands-on involvement (available on a case-by-case basis if needed)',
     ],
     price: 20000,
   },
   Premium: {
     name: 'Jumpstart AI Premium',
     features: [
-      'A dedicated ThoughtSpot expert will work alongside your team as a true partner throughout the project',
+      'Hands-on Spotter and Liveboard development support – we build alongside your team',
+      'A dedicated ThoughtSpot expert working with you as a true partner throughout the project',
+      'We\'ll create production-ready Spotters and Liveboards tailored to your business questions',
       'Role-specific training for analysts, business users, power users, and administrators',
-      'We\'ll tackle multiple complex use cases across different departments or business units',
       'Advanced features like custom actions, sophisticated security models, and complex integrations',
-      'Phased rollout approach with ongoing optimization based on user feedback and usage patterns',
+      'Phased rollout with ongoing optimization based on real user feedback and usage patterns',
       'Regular executive check-ins to review progress, adoption metrics, and business value delivered',
-      'Strategic guidance on scaling ThoughtSpot across your organization for maximum impact',
     ],
     price: 60000,
   },
@@ -255,14 +259,15 @@ export default function PSPackageRecommender() {
     if (acv <= ACV_TIERS.lowMax) {
       if (baseRecommendation === 'Premium') {
         final = 'Advanced'
-        reasonForChange = `Based on the ACV of $${acv.toLocaleString()}, we recommend the Advanced package to ensure the investment is well-balanced with the deal size.`
+        reasonForChange = `Based on the ACV of $${acv.toLocaleString()}, we recommend the Advanced package to better align with the deal value. Advanced provides strategic recommendations and guidance rather than hands-on development.`
         featuresGainedLost = [
-          '📌 What changes with Advanced instead of Premium:',
-          '• You\'ll still get comprehensive implementation and multiple use cases',
-          '• Training will cover all the essentials your team needs',
-          '• We\'ll include rollout planning and post-launch support',
-          '• The main difference is less hands-on co-development time and fewer executive touchpoints',
-          '• This is still a robust package that delivers real value for your investment',
+          '📌 What Advanced includes:',
+          '• Strategic recommendations and best practices for implementation',
+          '• Guidance on data modeling, security, and platform optimization',
+          '• In-depth training covering Search, Liveboards, formulas, and admin',
+          '• Rollout planning recommendations to drive adoption',
+          '• Advisory support (hands-on available on case-by-case basis if needed)',
+          '💡 If hands-on Spotter/Liveboard support is critical, discuss Premium with the PS team',
         ]
       }
     }
@@ -275,28 +280,28 @@ export default function PSPackageRecommender() {
     else if (acv >= ACV_TIERS.grayMax) {
       if (baseRecommendation === 'Advanced') {
         final = 'Premium'
-        reasonForChange = `With an ACV of $${acv.toLocaleString()}, upgrading to Premium makes sense to maximize the value delivered to this customer.`
+        reasonForChange = `Based on the ACV of $${acv.toLocaleString()}, we recommend considering the Premium package instead of Advanced. With Premium, you get hands-on Spotter and Liveboard development support rather than just advisory guidance. Please discuss with the Professional Services team to confirm this is the right fit.`
         featuresGainedLost = [
-          '🚀 What you gain with Premium:',
-          '• A dedicated ThoughtSpot expert working alongside your team throughout the project',
-          '• Customized training for different roles – analysts, power users, and admins each get what they need',
+          '🚀 Why Premium might be better for this deal:',
+          '• Hands-on Spotter and Liveboard development – we build with you, not just advise',
+          '• A dedicated ThoughtSpot expert working alongside your team as a true partner',
+          '• Production-ready deliverables tailored to your specific business questions',
           '• Regular executive check-ins to track progress and demonstrate business value',
           '• Phased rollout with ongoing optimization based on real usage data',
-          '• Advanced capabilities like custom actions and sophisticated security models',
+          '💡 Speak with the PS team to finalize the best package for this customer',
         ]
       } else if (baseRecommendation === 'Foundation') {
         // Edge case: Foundation with high ACV
         final = 'Advanced'
         flagPremiumOptional = true
-        reasonForChange = `Given the ACV of $${acv.toLocaleString()}, we recommend upgrading to Advanced to deliver more value. Premium could also be a great fit for this deal.`
+        reasonForChange = `Given the ACV of $${acv.toLocaleString()}, we recommend at least the Advanced package. For hands-on Spotter and Liveboard development, Premium would be ideal – please discuss with the Professional Services team.`
         featuresGainedLost = [
           '🚀 What you gain with Advanced:',
-          '• Full platform setup with data modeling and performance optimization',
-          '• In-depth training that goes beyond the basics',
-          '• Multiple Liveboards and Answers tailored to your business needs',
-          '• A clear rollout plan to drive adoption across the organization',
-          '• Post-launch support to ensure long-term success',
-          '💡 With this ACV, Premium could also be worth discussing with the PSC team',
+          '• Strategic recommendations and best practices for implementation',
+          '• Guidance on data modeling, security, and optimization',
+          '• In-depth training covering all key platform capabilities',
+          '• Rollout planning recommendations to drive adoption',
+          '💡 For hands-on Spotter/Liveboard support, consider Premium – discuss with the PS team',
         ]
       }
     }
