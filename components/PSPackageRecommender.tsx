@@ -42,38 +42,40 @@ const ACV_TIERS = {
   // ≥140K → Push toward Premium
 }
 
-// Package Features for comparison
+// Package Features for comparison - Human-friendly descriptions
 const PACKAGE_FEATURES = {
   Foundation: {
     name: 'Jumpstart AI Foundation',
     features: [
-      'Core Platform Setup & Configuration',
-      'Basic Training & Enablement',
-      'Single Use Case Development',
-      'Knowledge Transfer & Documentation',
+      'We\'ll get your ThoughtSpot environment up and running with your data connected and ready to go',
+      'Your team will learn the basics of searching data, building Liveboards, and navigating the platform',
+      'We\'ll build one production-ready Liveboard together so you can see best practices in action',
+      'You\'ll get documentation and guidelines to help your team continue building on their own',
     ],
     price: 5000,
   },
   Advanced: {
     name: 'Jumpstart AI Advanced',
     features: [
-      'Comprehensive Implementation',
-      'Advanced Training (Search, Liveboards, Admin)',
-      'Multiple Use Cases with Business Logic',
-      'Rollout Planning & Change Management',
-      'Post-launch Guidance',
+      'Full platform setup including data modeling, security configuration, and performance optimization',
+      'In-depth training sessions covering Search, Liveboard creation, formulas, and admin capabilities',
+      'We\'ll develop multiple Liveboards and Answers tailored to your specific business questions',
+      'Your business logic and custom calculations will be built right into your data model',
+      'We\'ll create a rollout plan to help drive adoption across your organization',
+      'Post-launch check-ins to make sure everything is working smoothly and answer questions',
     ],
     price: 20000,
   },
   Premium: {
     name: 'Jumpstart AI Premium',
     features: [
-      'Strategic Partnership & Co-development',
-      'Role-based Training (Analysts, Power Users, Admins)',
-      'Enterprise-scale Multi-use Case Deployment',
-      'Advanced Features (Custom Actions, Complex Security)',
-      'Phased Rollout with Continuous Optimization',
-      'Executive Engagement & Success Metrics',
+      'A dedicated ThoughtSpot expert will work alongside your team as a true partner throughout the project',
+      'Role-specific training for analysts, business users, power users, and administrators',
+      'We\'ll tackle multiple complex use cases across different departments or business units',
+      'Advanced features like custom actions, sophisticated security models, and complex integrations',
+      'Phased rollout approach with ongoing optimization based on user feedback and usage patterns',
+      'Regular executive check-ins to review progress, adoption metrics, and business value delivered',
+      'Strategic guidance on scaling ThoughtSpot across your organization for maximum impact',
     ],
     price: 60000,
   },
@@ -253,14 +255,14 @@ export default function PSPackageRecommender() {
     if (acv <= ACV_TIERS.lowMax) {
       if (baseRecommendation === 'Premium') {
         final = 'Advanced'
-        reasonForChange = `Due to ACV of $${acv.toLocaleString()} (≤$110K), we recommend Advanced instead of Premium to better align with deal value.`
+        reasonForChange = `Based on the ACV of $${acv.toLocaleString()}, we recommend the Advanced package to ensure the investment is well-balanced with the deal size.`
         featuresGainedLost = [
-          '❌ Removed: Strategic Partnership & Co-development',
-          '❌ Removed: Executive Engagement & Success Metrics',
-          '❌ Removed: Enterprise-scale deployment features',
-          '✅ Retained: Comprehensive implementation',
-          '✅ Retained: Multiple use cases with business logic',
-          '✅ Retained: Post-launch guidance',
+          '📌 What changes with Advanced instead of Premium:',
+          '• You\'ll still get comprehensive implementation and multiple use cases',
+          '• Training will cover all the essentials your team needs',
+          '• We\'ll include rollout planning and post-launch support',
+          '• The main difference is less hands-on co-development time and fewer executive touchpoints',
+          '• This is still a robust package that delivers real value for your investment',
         ]
       }
     }
@@ -273,25 +275,28 @@ export default function PSPackageRecommender() {
     else if (acv >= ACV_TIERS.grayMax) {
       if (baseRecommendation === 'Advanced') {
         final = 'Premium'
-        reasonForChange = `With ACV of $${acv.toLocaleString()} (≥$140K), the deal value justifies upgrading to Premium for maximum value delivery.`
+        reasonForChange = `With an ACV of $${acv.toLocaleString()}, upgrading to Premium makes sense to maximize the value delivered to this customer.`
         featuresGainedLost = [
-          '✅ Added: Strategic Partnership & Co-development',
-          '✅ Added: Role-based training for all user types',
-          '✅ Added: Executive Engagement & Success Metrics',
-          '✅ Added: Phased rollout with continuous optimization',
-          '✅ Added: Advanced features (Custom Actions, Complex Security)',
+          '🚀 What you gain with Premium:',
+          '• A dedicated ThoughtSpot expert working alongside your team throughout the project',
+          '• Customized training for different roles – analysts, power users, and admins each get what they need',
+          '• Regular executive check-ins to track progress and demonstrate business value',
+          '• Phased rollout with ongoing optimization based on real usage data',
+          '• Advanced capabilities like custom actions and sophisticated security models',
         ]
       } else if (baseRecommendation === 'Foundation') {
         // Edge case: Foundation with high ACV
         final = 'Advanced'
         flagPremiumOptional = true
-        reasonForChange = `High ACV of $${acv.toLocaleString()} suggests upgrading from Foundation to at least Advanced. Premium may also be appropriate.`
+        reasonForChange = `Given the ACV of $${acv.toLocaleString()}, we recommend upgrading to Advanced to deliver more value. Premium could also be a great fit for this deal.`
         featuresGainedLost = [
-          '✅ Added: Comprehensive implementation',
-          '✅ Added: Advanced training',
-          '✅ Added: Multiple use cases with business logic',
-          '✅ Added: Rollout planning & change management',
-          '💡 Consider Premium for strategic partnership',
+          '🚀 What you gain with Advanced:',
+          '• Full platform setup with data modeling and performance optimization',
+          '• In-depth training that goes beyond the basics',
+          '• Multiple Liveboards and Answers tailored to your business needs',
+          '• A clear rollout plan to drive adoption across the organization',
+          '• Post-launch support to ensure long-term success',
+          '💡 With this ACV, Premium could also be worth discussing with the PSC team',
         ]
       }
     }
@@ -389,17 +394,16 @@ export default function PSPackageRecommender() {
       reasons.push('• Multiple use cases across different business areas')
     }
 
-    // Score Analysis Section
+    // Complexity Analysis Section (score kept internal)
     reasons.push('')
     reasons.push('**Complexity Analysis:**')
-    reasons.push(`• Complexity Score: ${totalScore} out of 22 possible points`)
     
     if (totalScore <= THRESHOLDS.foundation) {
-      reasons.push(`• Score indicates a straightforward implementation (0-${THRESHOLDS.foundation} range)`)
+      reasons.push('• Your project profile indicates a straightforward implementation with focused requirements')
     } else if (totalScore <= THRESHOLDS.advanced) {
-      reasons.push(`• Score indicates moderate complexity (${THRESHOLDS.foundation + 1}-${THRESHOLDS.advanced} range)`)
+      reasons.push('• Your project profile indicates moderate complexity requiring balanced guidance and hands-on support')
     } else {
-      reasons.push(`• Score indicates high complexity (>${THRESHOLDS.advanced} range)`)
+      reasons.push('• Your project profile indicates high complexity suitable for enterprise-scale deployment')
     }
 
     // Why This Package Fits Section
@@ -436,15 +440,20 @@ export default function PSPackageRecommender() {
     
     const features = PACKAGE_FEATURES[packageLevel as keyof typeof PACKAGE_FEATURES]?.features || []
     features.forEach(feature => {
-      reasons.push(`• **${feature}**`)
+      reasons.push(`• ${feature}`)
     })
 
+    // Add contextual extras based on their selections
     if (formData.businessLogic.includes('Advanced') && packageLevel !== 'Foundation') {
-      reasons.push('• **Advanced Analytics:** Custom formulas, calculations, and complex business logic implementation')
+      reasons.push('• Your advanced business logic needs (custom formulas, fiscal calendars, complex KPIs) will be built into the data model')
     }
     
     if (formData.securityReq.includes('Advanced') && packageLevel === 'Premium') {
-      reasons.push('• **Advanced Security:** User-level RLS, compliance controls, and audit framework implementation')
+      reasons.push('• We\'ll implement your compliance and security requirements including user-level access controls and audit capabilities')
+    }
+
+    if (formData.useCases === '>1 (Multiple)') {
+      reasons.push('• Each use case will be tailored to the specific needs of that business area')
     }
 
     return reasons
@@ -661,7 +670,7 @@ export default function PSPackageRecommender() {
                 ))}
               </select>
             </div>
-          </div>
+            </div>
 
           <div className={styles.column}>
             <div className={styles.field}>
@@ -679,7 +688,7 @@ export default function PSPackageRecommender() {
                   </option>
                 ))}
               </select>
-            </div>
+          </div>
 
             <div className={styles.field}>
               <Tooltip content={tooltips.useCases}>
@@ -730,7 +739,6 @@ export default function PSPackageRecommender() {
             <div className={styles.recommendationBox}>
               <h3 className={styles.packageName}>{recommendation.package}</h3>
               <div className={styles.packageDetails}>
-                <span className={styles.detail}>Complexity Score: {recommendation.score}</span>
                 <span className={styles.detail}>Approx. Price: ${recommendation.price.toLocaleString()}</span>
               </div>
               {recommendation.baseRecommendation !== recommendation.finalRecommendation && (
@@ -831,25 +839,25 @@ export default function PSPackageRecommender() {
                 <div className={styles.contactMethod}>
                   <strong>Slack:</strong> {PSC_CONTACT.slackChannel}
                 </div>
-              </div>
-              <div className={styles.contactTable}>
+            </div>
+                  <div className={styles.contactTable}>
                 <h4 className={styles.contactTitle}>Regional Contacts:</h4>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th>Region</th>
-                      <th>Name</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                    <table className={styles.table}>
+                      <thead>
+                        <tr>
+                          <th>Region</th>
+                          <th>Name</th>
+                        </tr>
+                      </thead>
+                      <tbody>
                     {PSC_CONTACT.contacts.map((contact, idx) => (
                       <tr key={idx}>
                         <td>{contact.region}</td>
                         <td>{contact.name}</td>
-                      </tr>
+                        </tr>
                     ))}
-                  </tbody>
-                </table>
+                      </tbody>
+                    </table>
               </div>
             </div>
           </div>
