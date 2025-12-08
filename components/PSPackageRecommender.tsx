@@ -4,7 +4,94 @@ import { useState } from 'react'
 import Tooltip from './Tooltip'
 import styles from './PSPackageRecommender.module.css'
 
+// ============================================
+// CONFIGURATION - Easy to update labels/values
+// ============================================
+
+// TODO: Update these labels as needed for clarity
+const DATA_SOURCE_LABELS = {
+  single: 'Single TS data model, single underlying source',
+  multipleUnified: 'Single TS data model, multiple underlying sources already unified in CDW',
+  complex: 'Multiple TS data models or complex cross-system integrations',
+}
+
+// PSC Team Contact - Configurable
+const PSC_CONTACT = {
+  email: 'psc-team@thoughtspot.com',
+  slackChannel: '#ps-consulting',
+  contacts: [
+    { name: 'MJ Densmore', region: 'NA' },
+    { name: 'Carolyn Chupa', region: 'NA' },
+    { name: 'Camilla Tanzi', region: 'EMEA' },
+    { name: 'Hetarth Chokshi', region: 'EMEA' },
+    { name: 'Arjun Krishnan', region: 'Scale' },
+  ],
+}
+
+// Package Thresholds
+const THRESHOLDS = {
+  foundation: 11,  // 0-11 = Foundation
+  advanced: 16,    // >11-16 = Advanced (Jumpstart AI Advanced)
+  // >16 = Premium
+}
+
+// ACV Tiers
+const ACV_TIERS = {
+  lowMax: 110000,    // ≤110K → Force Advanced
+  grayMax: 140000,   // 110K-140K → Gray area, no change
+  // ≥140K → Push toward Premium
+}
+
+// Package Features for comparison
+const PACKAGE_FEATURES = {
+  Foundation: {
+    name: 'Jumpstart AI Foundation',
+    features: [
+      'Core Platform Setup & Configuration',
+      'Basic Training & Enablement',
+      'Single Use Case Development',
+      'Knowledge Transfer & Documentation',
+    ],
+    price: 5000,
+  },
+  Advanced: {
+    name: 'Jumpstart AI Advanced',
+    features: [
+      'Comprehensive Implementation',
+      'Advanced Training (Search, Liveboards, Admin)',
+      'Multiple Use Cases with Business Logic',
+      'Rollout Planning & Change Management',
+      'Post-launch Guidance',
+    ],
+    price: 20000,
+  },
+  Premium: {
+    name: 'Jumpstart AI Premium',
+    features: [
+      'Strategic Partnership & Co-development',
+      'Role-based Training (Analysts, Power Users, Admins)',
+      'Enterprise-scale Multi-use Case Deployment',
+      'Advanced Features (Custom Actions, Complex Security)',
+      'Phased Rollout with Continuous Optimization',
+      'Executive Engagement & Success Metrics',
+    ],
+    price: 60000,
+  },
+}
+
+// Modernization Package Prices
+const MODERNIZATION_PRICES = {
+  Foundation: 20000,
+  Advanced: 50000,
+  Premium: 80000,
+}
+
+// ============================================
+// TYPES
+// ============================================
+
 interface FormData {
+  acv: string  // Moved to Step 1
   teamSize: string
   primaryNeed: string
   dataComplexity: string
@@ -17,12 +104,32 @@ interface FormData {
   isMigration: boolean
 }
 
+interface RecommendationResult {
+  score: number
+  baseRecommendation: string
+  finalRecommendation: string
+  explanation: {
+    reasonForChange: string | null
+    featuresGainedLost: string[]
+    ctaToPSC: boolean
+    premiumOptional?: boolean
+  }
+  package: string
+  price: number
+  reasoning: string[]
+}
+
 interface DropdownOption {
   [key: string]: number
 }
 
+// ============================================
+// MAIN COMPONENT
+// ============================================
+
 export default function PSPackageRecommender() {
   const [formData, setFormData] = useState<FormData>({
+    acv: '',  // ACV now in Step 1
     teamSize: 'Select...',
     primaryNeed: 'Select...',
     dataComplexity: 'Select...',
@@ -35,9 +142,7 @@ export default function PSPackageRecommender() {
     isMigration: false,
   })
 
-  const [recommendation, setRecommendation] = useState<any>(null)
-  const [acv, setAcv] = useState<string>('')
-  const [acvValidation, setAcvValidation] = useState<any>(null)
+  const [recommendation, setRecommendation] = useState<RecommendationResult | null>(null)
 
   // Dropdown options with scores
   const teamSizeOptions: DropdownOption = {
@@ -54,11 +159,12 @@ export default function PSPackageRecommender() {
     'Production-ready polished use case': 2,
   }
 
+  // Using configurable labels
   const dataComplexityOptions: DropdownOption = {
     'Select...': 0,
-    'Single data source (simple schema)': 1,
-    'Multiple data sources (moderate complexity)': 2,
-    'Complex multi-source integration (advanced)': 3,
+    [DATA_SOURCE_LABELS.single]: 1,
+    [DATA_SOURCE_LABELS.multipleUnified]: 2,
+    [DATA_SOURCE_LABELS.complex]: 3,
   }
 
   const businessLogicOptions: DropdownOption = {
@@ -91,77 +197,182 @@ export default function PSPackageRecommender() {
     'Custom Actions': 2,
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  // ============================================
+  // RECOMMENDATION PIPELINE
+  // ============================================
 
-    const selections = [
-      formData.teamSize,
-      formData.primaryNeed,
-      formData.dataComplexity,
-      formData.businessLogic,
-      formData.securityReq,
-      formData.useCases,
-      formData.goLive,
-    ]
+  /**
+   * Step 1: Calculate complexity score
+   */
+  const calculateScore = (inputs: FormData): number => {
+    let score = 
+      teamSizeOptions[inputs.teamSize] +
+      primaryNeedOptions[inputs.primaryNeed] +
+      dataComplexityOptions[inputs.dataComplexity] +
+      businessLogicOptions[inputs.businessLogic] +
+      securityReqOptions[inputs.securityReq] +
+      useCasesOptions[inputs.useCases] +
+      goLiveOptions[inputs.goLive]
 
-    if (selections.includes('Select...') || formData.tsaTse === 'Select...') {
-      alert('Please fill out all fields, including Deployment Type.')
-      return
+    // Add TSE custom actions bonus
+    if (inputs.tsaTse === 'TSE (ThoughtSpot Embedding)' && inputs.tseType === 'Custom Actions') {
+      score += 1
     }
 
-    let totalScore = 
-      teamSizeOptions[formData.teamSize] +
-      primaryNeedOptions[formData.primaryNeed] +
-      dataComplexityOptions[formData.dataComplexity] +
-      businessLogicOptions[formData.businessLogic] +
-      securityReqOptions[formData.securityReq] +
-      useCasesOptions[formData.useCases] +
-      goLiveOptions[formData.goLive]
+    return score
+  }
 
-    if (formData.tsaTse === 'TSE (ThoughtSpot Embedding)' && formData.tseType === 'Custom Actions') {
-      totalScore += 1
-    }
-
-    let packageLevel = ''
-    if (totalScore <= 10) {
-      packageLevel = 'Starter'
-    } else if (totalScore <= 18) {
-      packageLevel = 'Advanced'
+  /**
+   * Step 2: Get base recommendation from score only
+   */
+  const getBaseRecommendation = (score: number): string => {
+    if (score <= THRESHOLDS.foundation) {
+      return 'Foundation'
+    } else if (score <= THRESHOLDS.advanced) {
+      return 'Advanced'
     } else {
-      packageLevel = 'Premium'
+      return 'Premium'
+    }
+  }
+
+  /**
+   * Step 3: Apply ACV logic to get final recommendation
+   */
+  const applyAcvLogic = (baseRecommendation: string, acv: number): { 
+    final: string, 
+    flagPremiumOptional: boolean,
+    reasonForChange: string | null,
+    featuresGainedLost: string[]
+  } => {
+    let final = baseRecommendation
+    let flagPremiumOptional = false
+    let reasonForChange: string | null = null
+    let featuresGainedLost: string[] = []
+
+    // ACV ≤ 110K → Force Advanced (even if base says Premium)
+    if (acv <= ACV_TIERS.lowMax) {
+      if (baseRecommendation === 'Premium') {
+        final = 'Advanced'
+        reasonForChange = `Due to ACV of $${acv.toLocaleString()} (≤$110K), we recommend Advanced instead of Premium to better align with deal value.`
+        featuresGainedLost = [
+          '❌ Removed: Strategic Partnership & Co-development',
+          '❌ Removed: Executive Engagement & Success Metrics',
+          '❌ Removed: Enterprise-scale deployment features',
+          '✅ Retained: Comprehensive implementation',
+          '✅ Retained: Multiple use cases with business logic',
+          '✅ Retained: Post-launch guidance',
+        ]
+      }
+    }
+    // 110K < ACV < 140K → Gray area, no change
+    else if (acv > ACV_TIERS.lowMax && acv < ACV_TIERS.grayMax) {
+      // No change - keep base recommendation
+      final = baseRecommendation
+    }
+    // ACV ≥ 140K → Push toward Premium
+    else if (acv >= ACV_TIERS.grayMax) {
+      if (baseRecommendation === 'Advanced') {
+        final = 'Premium'
+        reasonForChange = `With ACV of $${acv.toLocaleString()} (≥$140K), the deal value justifies upgrading to Premium for maximum value delivery.`
+        featuresGainedLost = [
+          '✅ Added: Strategic Partnership & Co-development',
+          '✅ Added: Role-based training for all user types',
+          '✅ Added: Executive Engagement & Success Metrics',
+          '✅ Added: Phased rollout with continuous optimization',
+          '✅ Added: Advanced features (Custom Actions, Complex Security)',
+        ]
+      } else if (baseRecommendation === 'Foundation') {
+        // Edge case: Foundation with high ACV
+        final = 'Advanced'
+        flagPremiumOptional = true
+        reasonForChange = `High ACV of $${acv.toLocaleString()} suggests upgrading from Foundation to at least Advanced. Premium may also be appropriate.`
+        featuresGainedLost = [
+          '✅ Added: Comprehensive implementation',
+          '✅ Added: Advanced training',
+          '✅ Added: Multiple use cases with business logic',
+          '✅ Added: Rollout planning & change management',
+          '💡 Consider Premium for strategic partnership',
+        ]
+      }
     }
 
-    const packageType = formData.isMigration ? 'Modernization' : 'Jumpstart AI'
-    const recommendedPackage = `${packageType} ${packageLevel}`
+    return { final, flagPremiumOptional, reasonForChange, featuresGainedLost }
+  }
+
+  /**
+   * Step 4: Build explanation object
+   */
+  const buildExplanation = (
+    score: number,
+    acv: number,
+    baseRecommendation: string,
+    finalRecommendation: string,
+    acvResult: { reasonForChange: string | null, featuresGainedLost: string[], flagPremiumOptional: boolean }
+  ) => {
+    const ctaToPSC = baseRecommendation !== finalRecommendation || acvResult.flagPremiumOptional
     
-    const prices: any = {
-      'Modernization': { Starter: 20000, Advanced: 50000, Premium: 80000 },
-      'Jumpstart AI': { Starter: 5000, Advanced: 20000, Premium: 60000 },
+    return {
+      reasonForChange: acvResult.reasonForChange,
+      featuresGainedLost: acvResult.featuresGainedLost,
+      ctaToPSC,
+      premiumOptional: acvResult.flagPremiumOptional,
     }
-    const price = prices[packageType][packageLevel]
+  }
 
-    const reasoning = generateReasoning(
-      totalScore,
-      formData,
-      recommendedPackage,
-      packageLevel
+  /**
+   * Main calculation function - Pipeline
+   */
+  const calculateRecommendation = (inputs: FormData): RecommendationResult => {
+    const score = calculateScore(inputs)
+    const baseRecommendation = getBaseRecommendation(score)
+    const acvNumber = Number(inputs.acv) || 0
+    
+    const acvResult = applyAcvLogic(baseRecommendation, acvNumber)
+    const finalRecommendation = acvResult.final
+
+    const explanation = buildExplanation(
+      score,
+      acvNumber,
+      baseRecommendation,
+      finalRecommendation,
+      acvResult
     )
 
-    setRecommendation({
-      package: recommendedPackage,
-      score: totalScore,
+    // Build package name
+    const packageType = inputs.isMigration ? 'Modernization' : 'Jumpstart AI'
+    const packageName = `${packageType} ${finalRecommendation}`
+    
+    // Get price
+    const price = inputs.isMigration 
+      ? MODERNIZATION_PRICES[finalRecommendation as keyof typeof MODERNIZATION_PRICES]
+      : PACKAGE_FEATURES[finalRecommendation as keyof typeof PACKAGE_FEATURES].price
+
+    // Generate reasoning
+    const reasoning = generateReasoning(score, inputs, packageName, finalRecommendation, baseRecommendation, acvNumber)
+
+    return {
+      score,
+      baseRecommendation,
+      finalRecommendation,
+      explanation,
+      package: packageName,
       price,
       reasoning,
-    })
-    setAcvValidation(null)
+    }
   }
+
+  // ============================================
+  // REASONING GENERATOR
+  // ============================================
 
   const generateReasoning = (
     totalScore: number,
     formData: FormData,
     recommendedPackage: string,
-    packageLevel: string
-  ) => {
+    packageLevel: string,
+    baseLevel: string,
+    acv: number
+  ): string[] => {
     const reasons = []
 
     // Project Overview Section
@@ -170,38 +381,41 @@ export default function PSPackageRecommender() {
     const projectType = formData.isMigration ? 'migrating from an existing BI platform' : 'implementing a new ThoughtSpot deployment'
     reasons.push(`• You're ${projectType} with a ${formData.primaryNeed.toLowerCase()} as your primary objective`)
     reasons.push(`• Expected team size of ${formData.teamSize.toLowerCase()} at go-live`)
+    reasons.push(`• Annual Contract Value (ACV): $${acv.toLocaleString()}`)
     reasons.push(`• Deployment architecture: ${formData.tsaTse}${formData.tsaTse.includes('TSE') ? ` (${formData.tseType})` : ''}`)
-    
-    const dataComplexityMap: { [key: string]: string } = {
-      'Single data source (simple schema)': 'single data source',
-      'Multiple data sources (moderate complexity)': 'multiple data sources',
-      'Complex multi-source integration (advanced)': 'complex multi-source integration'
-    }
-    reasons.push(`• Data complexity: ${dataComplexityMap[formData.dataComplexity] || formData.dataComplexity}`)
+    reasons.push(`• Data complexity: ${formData.dataComplexity}`)
     
     if (formData.useCases === '>1 (Multiple)') {
       reasons.push('• Multiple use cases across different business areas')
+    }
+
+    // Score Analysis Section
+    reasons.push('')
+    reasons.push('**Complexity Analysis:**')
+    reasons.push(`• Complexity Score: ${totalScore} out of 22 possible points`)
+    
+    if (totalScore <= THRESHOLDS.foundation) {
+      reasons.push(`• Score indicates a straightforward implementation (0-${THRESHOLDS.foundation} range)`)
+    } else if (totalScore <= THRESHOLDS.advanced) {
+      reasons.push(`• Score indicates moderate complexity (${THRESHOLDS.foundation + 1}-${THRESHOLDS.advanced} range)`)
+    } else {
+      reasons.push(`• Score indicates high complexity (>${THRESHOLDS.advanced} range)`)
     }
 
     // Why This Package Fits Section
     reasons.push('')
     reasons.push('**Why This Package is the Right Fit:**')
     
-    let complexityDescription = ''
     let alignmentReason = ''
     
-    if (totalScore <= 12) {
-      complexityDescription = 'straightforward implementation with focused requirements'
-      alignmentReason = `The ${packageLevel} package is designed for teams getting started with ThoughtSpot who need core platform capabilities without extensive customization.`
-    } else if (totalScore <= 20) {
-      complexityDescription = 'moderate complexity requiring balanced guidance and hands-on support'
-      alignmentReason = `The ${packageLevel} package provides the right mix of strategic guidance and technical implementation support for organizations scaling their analytics capabilities.`
+    if (packageLevel === 'Foundation') {
+      alignmentReason = `The Foundation package is designed for teams getting started with ThoughtSpot who need core platform capabilities without extensive customization.`
+    } else if (packageLevel === 'Advanced') {
+      alignmentReason = `The Advanced package provides the right mix of strategic guidance and technical implementation support for organizations scaling their analytics capabilities.`
     } else {
-      complexityDescription = 'enterprise-scale deployment with sophisticated requirements'
-      alignmentReason = `The ${packageLevel} package delivers comprehensive support and strategic partnership needed for large-scale, mission-critical implementations.`
+      alignmentReason = `The Premium package delivers comprehensive support and strategic partnership needed for large-scale, mission-critical implementations.`
     }
     
-    reasons.push(`• Your project profile indicates a ${complexityDescription}`)
     reasons.push(`• ${alignmentReason}`)
     
     if (formData.isMigration) {
@@ -220,85 +434,74 @@ export default function PSPackageRecommender() {
     reasons.push('')
     reasons.push('**What You\'ll Get with This Package:**')
     
-    if (packageLevel === 'Starter') {
-      reasons.push('• **Core Platform Setup:** Environment configuration, data source connection, and security implementation')
-      reasons.push('• **Training & Enablement:** Hands-on training for your team to get started with ThoughtSpot')
-      reasons.push('• **Use Case Development:** One production-ready Liveboard with best practices')
-      reasons.push('• **Knowledge Transfer:** Documentation and best practice guidelines for ongoing success')
-    } else if (packageLevel === 'Advanced') {
-      reasons.push('• **Comprehensive Implementation:** Full environment setup, data modeling, and advanced configuration')
-      reasons.push('• **Training & Enablement:** Comprehensive training covering search, Liveboards, and administration')
-      reasons.push('• **Multiple Use Cases:** Production-ready Liveboards and Answers with business logic implementation')
-      reasons.push('• **Rollout Planning:** Go-live strategy, user adoption planning, and change management support')
-      reasons.push('• **Ongoing Support:** Best practices documentation and post-launch guidance')
-      if (formData.businessLogic.includes('Advanced')) {
-        reasons.push('• **Advanced Analytics:** Custom formulas, calculations, and complex business logic implementation')
-      }
-    } else { // Premium
-      reasons.push('• **Strategic Partnership:** Dedicated expert team for co-development and architectural guidance')
-      reasons.push('• **Extensive Training:** Role-based training for analysts, power users, and administrators')
-      reasons.push('• **Enterprise-Scale Deployment:** Multiple use cases with complex data integrations and advanced features')
-      reasons.push('• **Advanced Features:** Custom actions, complex security models, and sophisticated business logic')
-      reasons.push('• **Iterative Rollout:** Phased deployment strategy with continuous optimization')
-      reasons.push('• **Executive Engagement:** Regular business reviews and success metrics tracking')
-      if (formData.securityReq.includes('Advanced')) {
-        reasons.push('• **Advanced Security:** User-level RLS, compliance controls, and audit framework implementation')
-      }
+    const features = PACKAGE_FEATURES[packageLevel as keyof typeof PACKAGE_FEATURES]?.features || []
+    features.forEach(feature => {
+      reasons.push(`• **${feature}**`)
+    })
+
+    if (formData.businessLogic.includes('Advanced') && packageLevel !== 'Foundation') {
+      reasons.push('• **Advanced Analytics:** Custom formulas, calculations, and complex business logic implementation')
+    }
+    
+    if (formData.securityReq.includes('Advanced') && packageLevel === 'Premium') {
+      reasons.push('• **Advanced Security:** User-level RLS, compliance controls, and audit framework implementation')
     }
 
     return reasons
   }
 
-  const handleAcvValidation = () => {
-    const acvNumber = Number(acv)
-    
-    if (!acv || acvNumber <= 0) {
+  // ============================================
+  // FORM HANDLERS
+  // ============================================
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const selections = [
+      formData.teamSize,
+      formData.primaryNeed,
+      formData.dataComplexity,
+      formData.businessLogic,
+      formData.securityReq,
+      formData.useCases,
+      formData.goLive,
+    ]
+
+    if (selections.includes('Select...') || formData.tsaTse === 'Select...') {
+      alert('Please fill out all fields, including Deployment Type.')
+      return
+    }
+
+    if (!formData.acv || Number(formData.acv) <= 0) {
       alert('Please enter a valid ACV greater than 0.')
       return
     }
 
-    let allowedLevels: string[] = []
-    let allowedStr = ''
-
-    if (acvNumber < 100000) {
-      allowedLevels = ['Starter', 'Advanced']
-      allowedStr = 'Starter or Advanced package'
-    } else if (acvNumber >= 100000 && acvNumber < 150000) {
-      allowedLevels = ['Advanced']
-      allowedStr = 'Advanced package'
-    } else {
-      allowedLevels = ['Premium']
-      allowedStr = 'Premium package'
-    }
-
-    const recLevel = recommendation.package.split(' ').pop()
-
-    if (allowedLevels.includes(recLevel)) {
-      setAcvValidation({
-        valid: true,
-        message: `The recommendation (${recommendation.package}) aligns with ACV $${acvNumber.toLocaleString()}. Proceed confidently.`,
-      })
-    } else {
-      const packageType = recommendation.package.split(' ')[0] + ' ' + recommendation.package.split(' ')[1]
-      setAcvValidation({
-        valid: false,
-        message: `Rethink for ACV $${acvNumber.toLocaleString()}: Suggest ${allowedStr} (${packageType} ${allowedStr.toLowerCase()}) instead of ${recLevel}. Alternatively, reach out to the PS team for further guidance.`,
-      })
-    }
+    const result = calculateRecommendation(formData)
+    setRecommendation(result)
   }
+
+  // ============================================
+  // TOOLTIPS
+  // ============================================
 
   const tooltips = {
-    teamSize: 'Expected number of users at go-live: This represents the total number of end users who will actively use ThoughtSpot once the use case is fully deployed. Consider all departments and roles that will need access to analytics and insights. This helps determine the scale of deployment and training needs.',
-    primaryNeed: 'Primary business objective: Select "Proof of Concept" if you\'re exploring ThoughtSpot\'s capabilities and validating fit with a pilot project. Choose "Production-ready polished use case" if you need a fully functional, enterprise-grade solution ready for broad deployment with complete data models, security, and governance in place.',
-    dataComplexity: 'Data architecture complexity: "Single data source" means connecting one database or data warehouse with straightforward tables. "Multiple data sources" involves integrating 2-3 different systems with moderate relationships. "Complex multi-source integration" indicates advanced scenarios with many sources, intricate joins, data blending, or real-time requirements.',
-    businessLogic: 'Business calculation requirements: "Standard aggregations" covers basic metrics like sum, count, average, and simple calculations. "Advanced formulas, custom calendars" includes complex KPIs, custom fiscal periods, cohort analysis, advanced statistical functions, or sophisticated business rules requiring formula expertise.',
-    securityReq: 'Data security and compliance needs: "Basic group RLS" (Row-Level Security) allows access control by user groups or departments. "Advanced user-level, compliance-heavy" requires granular permissions per individual user, strict audit trails, GDPR/HIPAA compliance, or complex data masking and governance policies.',
-    useCases: 'Number of use cases to implement: Select "1" if you\'re focusing on a single business area or department (e.g., Sales Analytics only). Choose ">1 (Multiple)" if you\'re deploying across multiple departments or business functions (e.g., Sales, Marketing, Operations, Finance) requiring different data models and analytics.',
-    goLive: 'Implementation support level: "Guided/advisory" means you have internal resources to do the work with expert guidance, best practices, and architectural reviews. "Hands on support/co-build" indicates you need ThoughtSpot consultants actively building alongside your team, doing data modeling, creating content, and configuring the platform.',
-    tsaTse: 'Deployment architecture: "TSA (ThoughtSpot Cloud)" is the standalone SaaS platform accessed via web browser for internal business intelligence. "TSE (ThoughtSpot Embedding)" embeds analytics directly into your own applications or products, providing a white-labeled, integrated analytics experience for your customers or users.',
-    tseType: 'Embedding complexity (TSE only): "Out of Box TSE" uses standard ThoughtSpot embedding with basic customization and theming. "Custom Actions" involves advanced integration with custom workflows, write-back capabilities to external systems, or triggering actions in your applications based on data insights.',
-    isMigration: 'Migration vs. new implementation: Check this if you\'re migrating from an existing BI tool (Tableau, Power BI, Looker, QlikView, etc.) and need help recreating dashboards, migrating content, user adoption, and change management. Uncheck for brand new ThoughtSpot deployments without prior BI systems.',
+    acv: 'Annual Contract Value: The total annual revenue from this customer\'s ThoughtSpot subscription. This helps calibrate the appropriate level of Professional Services investment relative to the deal size.',
+    teamSize: 'Expected number of users at go-live: This represents the total number of end users who will actively use ThoughtSpot once the use case is fully deployed.',
+    primaryNeed: 'Primary business objective: Select "Proof of Concept" if you\'re exploring ThoughtSpot\'s capabilities. Choose "Production-ready polished use case" if you need a fully functional, enterprise-grade solution.',
+    dataComplexity: 'Data architecture complexity: Describes how your data sources are structured and integrated with ThoughtSpot.',
+    businessLogic: 'Business calculation requirements: "Standard aggregations" covers basic metrics. "Advanced formulas, custom calendars" includes complex KPIs and sophisticated business rules.',
+    securityReq: 'Data security and compliance needs: "Basic group RLS" allows access control by user groups. "Advanced user-level, compliance-heavy" requires granular permissions and strict compliance.',
+    useCases: 'Number of use cases to implement: Select "1" for a single business area. Choose ">1 (Multiple)" for multiple departments or functions.',
+    goLive: 'Implementation support level: "Guided/advisory" means expert guidance with your team doing the work. "Hands on support/co-build" means ThoughtSpot consultants actively building alongside you.',
+    tsaTse: 'Deployment architecture: "TSA (ThoughtSpot Cloud)" is standalone SaaS. "TSE (ThoughtSpot Embedding)" embeds analytics into your own applications.',
+    tseType: 'Embedding complexity: "Out of Box TSE" uses standard embedding. "Custom Actions" involves advanced integration with custom workflows.',
+    isMigration: 'Migration vs. new implementation: Check this if migrating from an existing BI tool.',
   }
+
+  // ============================================
+  // RENDER
+  // ============================================
 
   return (
     <div className={styles.container}>
@@ -307,6 +510,88 @@ export default function PSPackageRecommender() {
       </p>
 
       <form onSubmit={handleSubmit} className={styles.form}>
+        {/* Deal-Level Questions - ACV First */}
+        <div className={styles.sectionHeader}>
+          <h3>Deal Information</h3>
+        </div>
+        
+        <div className={styles.grid}>
+          <div className={styles.column}>
+            <div className={styles.field}>
+              <Tooltip content={tooltips.acv}>
+                <label className={styles.label}>Annual Contract Value (ACV) *</label>
+              </Tooltip>
+              <div className={styles.acvInputWrapper}>
+                <span className={styles.currencyPrefix}>$</span>
+                <input
+                  type="number"
+                  className={styles.numberInput}
+                  value={formData.acv}
+                  onChange={(e) => setFormData({ ...formData, acv: e.target.value })}
+                  placeholder="Enter ACV in USD"
+                  min="0"
+                  step="1000"
+                />
+              </div>
+            </div>
+
+            <div className={styles.field}>
+              <Tooltip content={tooltips.isMigration}>
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    className={styles.checkbox}
+                    checked={formData.isMigration}
+                    onChange={(e) => setFormData({ ...formData, isMigration: e.target.checked })}
+                  />
+                  Is this a Migration Project?
+                </label>
+              </Tooltip>
+            </div>
+          </div>
+
+          <div className={styles.column}>
+            <div className={styles.field}>
+              <Tooltip content={tooltips.tsaTse}>
+                <label className={styles.label}>Deployment Type (TSA/TSE)</label>
+              </Tooltip>
+              <select
+                className={styles.select}
+                value={formData.tsaTse}
+                onChange={(e) => setFormData({ ...formData, tsaTse: e.target.value })}
+              >
+                <option value="Select...">Select...</option>
+                <option value="TSA (ThoughtSpot Cloud)">TSA (ThoughtSpot Cloud)</option>
+                <option value="TSE (ThoughtSpot Embedding)">TSE (ThoughtSpot Embedding)</option>
+              </select>
+            </div>
+
+            {formData.tsaTse === 'TSE (ThoughtSpot Embedding)' && (
+              <div className={styles.field}>
+                <Tooltip content={tooltips.tseType}>
+                  <label className={styles.label}>TSE Type</label>
+                </Tooltip>
+                <select
+                  className={styles.select}
+                  value={formData.tseType}
+                  onChange={(e) => setFormData({ ...formData, tseType: e.target.value })}
+                >
+                  {Object.keys(tseTypeOptions).map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Complexity Questions */}
+        <div className={styles.sectionHeader}>
+          <h3>Project Complexity</h3>
+        </div>
+
         <div className={styles.grid}>
           <div className={styles.column}>
             <div className={styles.field}>
@@ -376,7 +661,9 @@ export default function PSPackageRecommender() {
                 ))}
               </select>
             </div>
+          </div>
 
+          <div className={styles.column}>
             <div className={styles.field}>
               <Tooltip content={tooltips.securityReq}>
                 <label className={styles.label}>Security Requirements</label>
@@ -393,9 +680,7 @@ export default function PSPackageRecommender() {
                 ))}
               </select>
             </div>
-          </div>
 
-          <div className={styles.column}>
             <div className={styles.field}>
               <Tooltip content={tooltips.useCases}>
                 <label className={styles.label}>Number of Use Cases</label>
@@ -429,79 +714,74 @@ export default function PSPackageRecommender() {
                 ))}
               </select>
             </div>
-
-            <div className={styles.field}>
-              <Tooltip content={tooltips.tsaTse}>
-                <label className={styles.label}>Deployment Type (TSA/TSE)</label>
-              </Tooltip>
-              <select
-                className={styles.select}
-                value={formData.tsaTse}
-                onChange={(e) => setFormData({ ...formData, tsaTse: e.target.value })}
-              >
-                <option value="Select...">Select...</option>
-                <option value="TSA (ThoughtSpot Cloud)">TSA (ThoughtSpot Cloud)</option>
-                <option value="TSE (ThoughtSpot Embedding)">TSE (ThoughtSpot Embedding)</option>
-              </select>
-            </div>
-
-            <div className={styles.field}>
-              <Tooltip content={tooltips.tseType}>
-                <label className={styles.label}>TSE Type (if TSE selected)</label>
-              </Tooltip>
-              <select
-                className={styles.select}
-                value={formData.tseType}
-                onChange={(e) => setFormData({ ...formData, tseType: e.target.value })}
-                disabled={formData.tsaTse !== 'TSE (ThoughtSpot Embedding)'}
-              >
-                {Object.keys(tseTypeOptions).map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.field}>
-              <Tooltip content={tooltips.isMigration}>
-                <label className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    className={styles.checkbox}
-                    checked={formData.isMigration}
-                    onChange={(e) => setFormData({ ...formData, isMigration: e.target.checked })}
-                  />
-                  Is this a Migration Project?
-                </label>
-              </Tooltip>
-            </div>
           </div>
         </div>
 
         <button type="submit" className={styles.submitButton}>
-          Submit & Recommend
+          Get Recommendation
         </button>
       </form>
 
       {recommendation && (
         <div className={styles.results}>
+          {/* Main Recommendation */}
           <div className={styles.resultCard}>
             <h2 className={styles.resultTitle}>✅ Recommended Package</h2>
             <div className={styles.recommendationBox}>
               <h3 className={styles.packageName}>{recommendation.package}</h3>
               <div className={styles.packageDetails}>
-                <span className={styles.detail}>Score: {recommendation.score}</span>
+                <span className={styles.detail}>Complexity Score: {recommendation.score}</span>
                 <span className={styles.detail}>Approx. Price: ${recommendation.price.toLocaleString()}</span>
               </div>
+              {recommendation.baseRecommendation !== recommendation.finalRecommendation && (
+                <div className={styles.scoreBreakdown}>
+                  <span className={styles.baseScore}>
+                    Base recommendation (from complexity): {recommendation.baseRecommendation}
+                  </span>
+                  <span className={styles.finalScore}>
+                    → Adjusted for ACV: {recommendation.finalRecommendation}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
+          {/* ACV Adjustment Explanation (if changed) */}
+          {recommendation.explanation.reasonForChange && (
+            <div className={styles.resultCard}>
+              <h2 className={styles.resultTitle}>📊 ACV-Based Adjustment</h2>
+              <div className={styles.acvExplanation}>
+                <p className={styles.reasonText}>{recommendation.explanation.reasonForChange}</p>
+                <div className={styles.featuresList}>
+                  <h4>Impact on Package Features:</h4>
+                  {recommendation.explanation.featuresGainedLost.map((feature, idx) => (
+                    <div key={idx} className={styles.featureItem}>{feature}</div>
+                  ))}
+                </div>
+                {recommendation.explanation.premiumOptional && (
+                  <div className={styles.premiumNote}>
+                    💡 <strong>Note:</strong> Given the high ACV, Premium package could also be a strong fit. Consider discussing with the PSC team.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Alignment Message (if no change) */}
+          {!recommendation.explanation.reasonForChange && (
+            <div className={styles.resultCard}>
+              <h2 className={styles.resultTitle}>✅ ACV Alignment</h2>
+              <div className={styles.alignmentMessage}>
+                <p>ACV of ${Number(formData.acv).toLocaleString()} is well-aligned with the complexity-based recommendation. The {recommendation.finalRecommendation} package is appropriate for this deal.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Reasoning */}
           <div className={styles.resultCard}>
             <h2 className={styles.resultTitle}>💡 Why We Recommend {recommendation.package}</h2>
             <div className={styles.reasoningList}>
               {recommendation.reasoning.map((reason: string, index: number) => {
-                // Check if it's a section header (starts with **)
                 if (reason.startsWith('**') && reason.endsWith(':**')) {
                   const headerText = reason.replace(/\*\*/g, '')
                   return (
@@ -511,12 +791,10 @@ export default function PSPackageRecommender() {
                   )
                 }
                 
-                // Check if it's empty (section separator)
                 if (reason.trim() === '') {
                   return <div key={index} className={styles.reasoningSpacer}></div>
                 }
                 
-                // Parse markdown bold syntax **text**
                 const parts = reason.split(/(\*\*.*?\*\*)/)
                 
                 return (
@@ -541,69 +819,47 @@ export default function PSPackageRecommender() {
             </a>
           </div>
 
+          {/* PSC Team CTA */}
           <div className={styles.resultCard}>
-            <h2 className={styles.resultTitle}>💰 ACV Validation</h2>
-            <p className={styles.acvDescription}>
-              Enter the account's Annual Contract Value (ACV) to validate the recommendation.
-            </p>
-            <div className={styles.acvInput}>
-              <input
-                type="number"
-                className={styles.numberInput}
-                value={acv}
-                onChange={(e) => setAcv(e.target.value)}
-                placeholder="Enter ACV in USD"
-                min="0"
-                step="1000"
-              />
-              <button onClick={handleAcvValidation} className={styles.validateButton}>
-                Validate with ACV
-              </button>
-            </div>
-            {acvValidation && (
-              <div className={acvValidation.valid ? styles.validationSuccess : styles.validationWarning}>
-                {acvValidation.message}
-                {!acvValidation.valid && (
-                  <div className={styles.contactTable}>
-                    <h3 className={styles.contactTitle}>📞 Contact PS Team</h3>
-                    <table className={styles.table}>
-                      <thead>
-                        <tr>
-                          <th>Region</th>
-                          <th>Name</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>NA</td>
-                          <td>MJ Densmore</td>
-                        </tr>
-                        <tr>
-                          <td>NA</td>
-                          <td>Carolyn Chupa</td>
-                        </tr>
-                        <tr>
-                          <td>EMEA</td>
-                          <td>Camilla Tanzi</td>
-                        </tr>
-                        <tr>
-                          <td>EMEA</td>
-                          <td>Hetarth Chokshi</td>
-                        </tr>
-                        <tr>
-                          <td>Scale</td>
-                          <td>Arjun Krishnan</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+            <h2 className={styles.resultTitle}>📞 Need Help?</h2>
+            <div className={styles.pscCta}>
+              <p className={styles.ctaText}>
+                If this recommendation doesn't feel right for your deal, or if you need additional guidance, 
+                please connect with the PSC team to discuss the best package for your customer.
+              </p>
+              <div className={styles.contactInfo}>
+                <div className={styles.contactMethod}>
+                  <strong>Slack:</strong> {PSC_CONTACT.slackChannel}
+                </div>
               </div>
-            )}
+              <div className={styles.contactTable}>
+                <h4 className={styles.contactTitle}>Regional Contacts:</h4>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Region</th>
+                      <th>Name</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {PSC_CONTACT.contacts.map((contact, idx) => (
+                      <tr key={idx}>
+                        <td>{contact.region}</td>
+                        <td>{contact.name}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Version Tag */}
+      <div className={styles.versionTag}>
+        PS Package Recommender v1.1 • Updated December 2025
+      </div>
     </div>
   )
 }
-

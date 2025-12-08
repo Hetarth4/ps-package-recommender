@@ -16,11 +16,10 @@
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 1.5rem;
-  flex-wrap: wrap;
 }
 
 .logoContainer {
@@ -42,35 +41,6 @@
   color: var(--ts-text-secondary);
   letter-spacing: 0.01em;
   text-align: center;
-  flex: 1;
-}
-
-.userSection {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.userEmail {
-  font-size: 0.9rem;
-  color: var(--ts-text-secondary);
-}
-
-.signOutButton {
-  padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  color: white;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.signOutButton:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
 }
 
 @media (max-width: 768px) {
@@ -88,4 +58,3 @@
     font-size: 1.25rem;
   }
 }
-

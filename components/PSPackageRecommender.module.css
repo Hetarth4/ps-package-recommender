@@ -548,6 +548,167 @@
   }
 }
 
+/* Section Headers */
+.sectionHeader {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0, 212, 221, 0.2);
+}
+
+.sectionHeader h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ts-primary);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+/* ACV Input Wrapper */
+.acvInputWrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.currencyPrefix {
+  position: absolute;
+  left: 1.25rem;
+  color: var(--ts-primary);
+  font-size: 1.125rem;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.acvInputWrapper .numberInput {
+  padding-left: 2.5rem;
+  width: 100%;
+}
+
+/* Score Breakdown */
+.scoreBreakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(0, 212, 221, 0.15);
+}
+
+.baseScore {
+  color: var(--ts-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.finalScore {
+  color: var(--ts-primary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+/* ACV Explanation */
+.acvExplanation {
+  padding: 1.5rem;
+  background: rgba(255, 184, 77, 0.08);
+  border: 1px solid rgba(255, 184, 77, 0.25);
+  border-radius: 12px;
+}
+
+.reasonText {
+  color: #FFB84D;
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+  font-weight: 500;
+}
+
+.featuresList {
+  margin-top: 1rem;
+}
+
+.featuresList h4 {
+  color: var(--ts-text-primary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.featureItem {
+  color: var(--ts-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  padding: 0.25rem 0;
+}
+
+.premiumNote {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  background: rgba(0, 212, 221, 0.1);
+  border: 1px solid rgba(0, 212, 221, 0.25);
+  border-radius: 8px;
+  color: var(--ts-text-primary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* Alignment Message */
+.alignmentMessage {
+  padding: 1.25rem;
+  background: rgba(0, 200, 150, 0.1);
+  border: 1px solid rgba(0, 200, 150, 0.25);
+  border-radius: 12px;
+}
+
+.alignmentMessage p {
+  color: #00E5A0;
+  font-size: 1rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* PSC CTA */
+.pscCta {
+  background: rgba(0, 212, 221, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(0, 212, 221, 0.15);
+}
+
+.ctaText {
+  color: var(--ts-text-secondary);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 1.25rem;
+}
+
+.contactInfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.contactMethod {
+  color: var(--ts-text-secondary);
+  font-size: 0.9375rem;
+}
+
+.contactMethod strong {
+  color: var(--ts-primary);
+}
+
+/* Version Tag */
+.versionTag {
+  margin-top: 3rem;
+  padding: 1rem;
+  text-align: center;
+  color: var(--ts-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-top: 1px solid rgba(0, 212, 221, 0.1);
+}
+
 @media (max-width: 640px) {
   .container {
     padding: 1rem 0;
@@ -576,6 +737,10 @@
   .packageDetails {
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .scoreBreakdown {
+    flex-direction: column;
   }
 }
 
