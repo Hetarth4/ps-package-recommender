@@ -894,10 +894,7 @@ export default function PSPackageRecommender() {
 
       {/* Version Tag with Score */}
       <div className={styles.versionTag}>
-        {recommendation && (
-          <span className={styles.scoreDisplay}>Complexity Score: #{recommendation.score}</span>
-        )}
-        <span>PS Package Recommender v1.1 • Updated December 2025</span>
+        <span>PS Package Recommender v1.1 • Updated December 2025{recommendation && ` • #${recommendation.score}`}</span>
       </div>
     </div>
   )

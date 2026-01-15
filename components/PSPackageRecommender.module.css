@@ -721,21 +721,6 @@
   font-weight: 500;
   letter-spacing: 0.02em;
   border-top: 1px solid rgba(0, 212, 221, 0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.scoreDisplay {
-  color: var(--ts-primary);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  background: rgba(0, 212, 221, 0.1);
-  border: 1px solid rgba(0, 212, 221, 0.3);
-  border-radius: 6px;
-  margin-bottom: 0.5rem;
 }
 
 /* Adjustment Note Styles */
