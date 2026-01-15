@@ -10,9 +10,9 @@ import styles from './PSPackageRecommender.module.css'
 
 // TODO: Update these labels as needed for clarity
 const DATA_SOURCE_LABELS = {
-  single: 'Single TS data model, single underlying source',
-  multipleUnified: 'Single TS data model, multiple underlying sources already unified in CDW',
-  complex: 'Multiple TS data models or complex cross-system integrations',
+  single: 'Single DS data model review',
+  multipleUnified: 'Multiple DS data model review',
+  complex: 'Hands-on help with Data model setup',
 }
 
 // PSC Team Contact - Configurable
@@ -519,6 +519,9 @@ export default function PSPackageRecommender() {
 
   return (
     <div className={styles.container}>
+      <div className={styles.betaDisclaimer}>
+        ⚠️ BETA VERSION - This tool is currently in beta testing. Recommendations should be validated with the PS team.
+      </div>
       <p className={styles.description}>
         Answer the questions below to recommend the best ThoughtSpot Professional Services package.
       </p>
@@ -738,35 +741,65 @@ export default function PSPackageRecommender() {
 
       {recommendation && (
         <div className={styles.results}>
-          {/* Main Recommendation */}
+          {/* Main Recommendation - Single Clear Package */}
           <div className={styles.resultCard}>
-            <h2 className={styles.resultTitle}>✅ Recommended Package</h2>
+            <h2 className={styles.resultTitle}>🎯 Your Recommended Package</h2>
             <div className={styles.recommendationBox}>
               <h3 className={styles.packageName}>{recommendation.package}</h3>
               <div className={styles.packageDetails}>
                 <span className={styles.detail}>Approx. Price: ${recommendation.price.toLocaleString()}</span>
               </div>
-              {recommendation.baseRecommendation !== recommendation.finalRecommendation && (
-                <div className={styles.scoreBreakdown}>
-                  <span className={styles.baseScore}>
-                    Base recommendation (from complexity): {recommendation.baseRecommendation}
-                  </span>
-                  <span className={styles.finalScore}>
-                    → Adjusted for ACV: {recommendation.finalRecommendation}
-                  </span>
+              <div className={styles.recommendationSummary}>
+                This is your <strong>recommended package</strong> based on your project complexity and deal size.
+              </div>
+            </div>
+          </div>
+
+          {/* How We Determined This - Transparency Section */}
+          <div className={styles.resultCard}>
+            <h2 className={styles.resultTitle}>📊 How We Determined This</h2>
+            <div className={styles.determinationBox}>
+              <div className={styles.determinationStep}>
+                <div className={styles.stepIcon}>1</div>
+                <div className={styles.stepContent}>
+                  <span className={styles.stepTitle}>Complexity Analysis</span>
+                  <span className={styles.stepDescription}>Based on your project inputs, the complexity score suggests: <strong>{recommendation.baseRecommendation}</strong></span>
                 </div>
+              </div>
+              {recommendation.baseRecommendation !== recommendation.finalRecommendation ? (
+                <>
+                  <div className={styles.determinationArrow}>↓</div>
+                  <div className={styles.determinationStep}>
+                    <div className={styles.stepIcon}>2</div>
+                    <div className={styles.stepContent}>
+                      <span className={styles.stepTitle}>ACV Alignment Check</span>
+                      <span className={styles.stepDescription}>Adjusted to <strong>{recommendation.finalRecommendation}</strong> to better align with your deal value of ${Number(formData.acv).toLocaleString()}</span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={styles.determinationArrow}>✓</div>
+                  <div className={styles.determinationStep}>
+                    <div className={styles.stepIconSuccess}>2</div>
+                    <div className={styles.stepContent}>
+                      <span className={styles.stepTitle}>ACV Alignment Check</span>
+                      <span className={styles.stepDescription}>Your ACV of ${Number(formData.acv).toLocaleString()} aligns well — no adjustment needed</span>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>
 
-          {/* ACV Adjustment Explanation (if changed) */}
+          {/* ACV Adjustment Details (if changed) */}
           {recommendation.explanation.reasonForChange && (
             <div className={styles.resultCard}>
-              <h2 className={styles.resultTitle}>📊 ACV-Based Adjustment</h2>
+              <h2 className={styles.resultTitle}>💡 Why the Adjustment?</h2>
               <div className={styles.acvExplanation}>
                 <p className={styles.reasonText}>{recommendation.explanation.reasonForChange}</p>
                 <div className={styles.featuresList}>
-                  <h4>Impact on Package Features:</h4>
+                  <h4>What&apos;s Included:</h4>
                   {recommendation.explanation.featuresGainedLost.map((feature, idx) => (
                     <div key={idx} className={styles.featureItem}>{feature}</div>
                   ))}
@@ -776,16 +809,6 @@ export default function PSPackageRecommender() {
                     💡 <strong>Note:</strong> Given the high ACV, Premium package could also be a strong fit. Consider discussing with the PSC team.
                   </div>
                 )}
-              </div>
-            </div>
-          )}
-
-          {/* Alignment Message (if no change) */}
-          {!recommendation.explanation.reasonForChange && (
-            <div className={styles.resultCard}>
-              <h2 className={styles.resultTitle}>✅ ACV Alignment</h2>
-              <div className={styles.alignmentMessage}>
-                <p>ACV of ${Number(formData.acv).toLocaleString()} is well-aligned with the complexity-based recommendation. The {recommendation.finalRecommendation} package is appropriate for this deal.</p>
               </div>
             </div>
           )}
@@ -823,12 +846,12 @@ export default function PSPackageRecommender() {
               })}
             </div>
             <a
-              href="https://docs.google.com/presentation/d/1pM38OTjtXXOGec_amVXO_dqnvfk2R24uGgjfPyE8UPI/edit?slide=id.g31b73a28df8_1_1472#slide=id.g31b73a28df8_1_1472"
+              href="https://docs.google.com/presentation/d/1wGNfz-RkVlBGjSrpj7j7jvDwRJfCVxy1ZzW118lOqNw/edit?slide=id.g3b53c21a736_0_0#slide=id.g3b53c21a736_0_0"
               target="_blank"
               rel="noopener noreferrer"
               className={styles.presentationLink}
             >
-              View {recommendation.package} Presentation →
+              View Jumpstart Presentation →
             </a>
           </div>
 
@@ -869,9 +892,12 @@ export default function PSPackageRecommender() {
         </div>
       )}
 
-      {/* Version Tag */}
+      {/* Version Tag with Score */}
       <div className={styles.versionTag}>
-        PS Package Recommender v1.1 • Updated December 2025
+        {recommendation && (
+          <span className={styles.scoreDisplay}>Complexity Score: #{recommendation.score}</span>
+        )}
+        <span>PS Package Recommender v1.1 • Updated December 2025</span>
       </div>
     </div>
   )
